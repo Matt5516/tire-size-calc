@@ -13,14 +13,14 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
   function verdictBox(level, text, big, sub) {
     return '<div class="verdict ' + CLS[level] + '"><span class="vicon">' + UI.icon(ICON[level]) + '</span><div>' + chip(level, text) + '<strong class="big">' + big + '</strong><span>' + sub + '</span></div></div>';
   }
-  function empty(msg) { return '<div class="empty">' + UI.icon('chart') + '<p><strong>' + msg + '</strong><br>Live results appear here as you type.</p></div>'; }
+  function empty(msg) { return '<div class="empty">' + UI.icon('chart') + '<p><strong>' + msg + '</strong><br>Your answer shows up here as you type.</p></div>'; }
   function tbl(cap, head, rows, foot) {
     return '<div class="table-scroll"><table class="cm-tbl"><caption class="sr-only">' + esc(cap) + '</caption><thead><tr>' + head.map(function (h, i) { return '<th scope="col"' + (i ? ' class="r"' : '') + '>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
       rows.map(function (r) { return '<tr' + (r.hl ? ' class="hl"' : '') + '>' + r.c.map(function (c, i) { return (i ? '<td class="r">' : '<th scope="row">') + c + (i ? '</td>' : '</th>'); }).join('') + '</tr>'; }).join('') + '</tbody>' + (foot || '') + '</table></div>';
   }
   var CAVEAT = '<p class="hint">Calculated from the sizes you typed. Real tires vary a little by brand and model, and the loaded radius under the vehicle is a bit smaller. A size within about 3% is a rule of thumb (Discount Tire, 1010tires), not a guarantee of fit: confirm the wheel width range, clearance, load index and speed rating. See <a href="' + root() + 'how-to-read-a-tire-size/">how to read a tire size</a> and <a href="' + root() + 'plus-sizing-explained/">plus sizing</a>.</p>';
   function actions(text) {
-    last = text; return '<div class="actions no-print"><button type="button" class="btn ghost sm" data-print>' + UI.icon('copy') + 'Print this sheet</button><button type="button" class="btn ghost sm" id="copySum">' + UI.icon('copy') + 'Copy result</button></div>';
+    last = text; return '<div class="actions no-print"><button type="button" class="btn ghost sm" data-print>' + UI.icon('copy') + 'Print it</button><button type="button" class="btn ghost sm" id="copySum">' + UI.icon('copy') + 'Copy the result</button></div>';
   }
   document.addEventListener('click', function (e) { if (e.target.closest('#copySum')) UI.copy(last, 'Result copied'); });
 
@@ -47,7 +47,7 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
   }
   function parse(id, required) {  // -> parsed size or null (and shows the inline error)
     var el = $(id), p = C.parseSize(el.value), err = $(id + 'E'), blank = !String(el.value).trim();
-    var msg = blank ? (required ? 'Enter a tire size, like 265/70R17.' : '') : (p.ok ? '' : p.error);
+    var msg = blank ? (required ? 'Type a tire size, like 265/70R17.' : '') : (p.ok ? '' : p.error);
     err.textContent = msg; el.setAttribute('aria-invalid', msg ? 'true' : 'false'); syncPick(el);
     return p.ok ? p : null;
   }
@@ -113,11 +113,11 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
   T.compare = {
     run: function () {
       var A = parse('a', true), hasB = String($('b').value).trim() !== '', B = parse('b', false);
-      if (!A) return empty('Enter your current tire size');
-      if (hasB && !B) return '<div class="alert err">' + UI.icon('alert') + '<div>Fix the new tire size to compare. ' + esc(C.ERR) + '.</div></div>';
+      if (!A) return empty('Type your current tire size');
+      if (hasB && !B) return '<div class="alert err">' + UI.icon('alert') + '<div>Fix the new size to compare. ' + esc(C.ERR) + '.</div></div>';
       var a = C.dims(A);
       if (!B) {
-        return '<h2>' + UI.icon('chart') + esc(a.label) + ' in inches</h2>' + verdictBox('close', 'One size', f(a.diaIn, 1) + ' in tall, ' + f(a.widthIn, 1) + ' in wide', 'On a ' + a.rim + ' in wheel, with a ' + f(a.sidewallIn, 1) + ' in sidewall. Type a new size above to compare.') +
+        return '<h2>' + UI.icon('chart') + esc(a.label) + ' in inches</h2>' + verdictBox('close', 'One size', f(a.diaIn, 1) + ' in tall, ' + f(a.widthIn, 1) + ' in wide', 'On a ' + a.rim + ' in wheel, with a ' + f(a.sidewallIn, 1) + ' in sidewall. Add a new size above to compare.') +
           '<div class="stats s3">' + stat('Height', f(a.diaIn, 2) + ' in') + stat('Width', f(a.widthIn, 2) + ' in') + stat('Revs per mile', f(a.revsPerMile, 0)) + '</div>' +
           tbl('Dimensions of ' + a.label, ['Measure', a.label], dimRows(a)) + single(a) + CAVEAT +
           '<p class="sw-cta"><a class="btn ghost sm" href="' + root() + 'tire-size-converter/?m=' + enc(a.label) + '">Convert to metric or find a 33 in size</a> <a class="btn ghost sm" href="' + root() + 'tire-size-finder/?s=' + enc(a.label) + '">Sizes that fit my wheel</a></p>' +
@@ -137,7 +137,7 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
       h += '<h3>To scale</h3>' + sideBySide(A1, B1) + overlay(A1, B1);
       var base = '?a=' + enc(A1.label) + '&b=' + enc(B1.label);
       h += '<p class="sw-cta"><a class="btn sm" href="' + root() + 'tire-size-finder/?s=' + enc(A1.label) + '">Sizes that fit my wheel</a> <a class="btn ghost sm" href="' + root() + 'gear-ratio-calculator/' + base + '">Regear for this size</a> <a class="btn ghost sm" href="' + root() + 'speedometer-calculator/' + base + '">Speedometer fix</a></p>';
-      h += '<p class="hint"><strong>How the verdict works:</strong> within 3% of the original height is a close match, over 3% up to 5% needs a clearance and speedometer check, over 5% is a big change. The 3% rule of thumb is quoted by <a href="https://www.discounttire.com/learn/tire-size-calculator" rel="noopener">Discount Tire</a> and <a href="https://www.1010tires.com/Tools/Tire-Size-Calculator" rel="noopener">1010tires</a>. It is a guideline, not a promise that the tire fits.</p>' + CAVEAT;
+      h += '<p class="hint"><strong>How the verdict works:</strong> within 3% of the original height is a close match, over 3% up to 5% needs a clearance and speedometer check, over 5% is a big change. The 3% rule of thumb is quoted by <a href="https://www.discounttire.com/learn/tire-size-calculator" rel="noopener">Discount Tire</a> and <a href="https://www.1010tires.com/Tools/Tire-Size-Calculator" rel="noopener">1010tires</a>. It’s a guideline, not a promise it fits.</p>' + CAVEAT;
       return h + actions('SidewallMath: ' + A1.label + ' to ' + B1.label + ' is ' + (same ? 'the same height' : pctT + ' (' + sg(c.diffIn, 2, ' in') + ')') + ', ' + c.verdictLong.toLowerCase() + '. ' + f(sp, 0) + ' mph indicated = ' + f(ts, 1) + ' mph. Ride height ' + sg(rh, 2, ' in') + '. ' + location.href);
     } };
 
@@ -163,25 +163,25 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
         var shown = opts.slice(0, 60);
         h += '<h2>' + UI.icon('search') + 'A ' + f(hh, 1).replace(/\.0$/, '') + ' inch tire in metric sizes</h2>';
         h += verdictBox(opts.length ? 'close' : 'check', opts.length ? 'Calculated' : 'None found', opts.length ? f(opts.length, 0) + ' calculated metric sizes within ±' + f(tol, 2).replace(/0$/, '') + ' in of ' + f(hh, 1) + ' in' : 'No standard-step size within ±' + f(tol, 2).replace(/0$/, '') + ' in',
-          (rim ? 'On a ' + rim + ' in wheel' : 'On 14 to 24 in wheels') + (wmm ? ', ' + wmm + ' mm wide' : '') + '. Calculated combinations: check that a tire is actually made in that size.');
+          (rim ? 'On a ' + rim + ' in wheel' : 'On 14 to 24 in wheels') + (wmm ? ', ' + wmm + ' mm wide' : '') + '. These are calculated sizes. Make sure a tire is actually sold in that size.');
         if (opts.length) h += tbl('Metric sizes near ' + hh + ' inches', ['Size', 'Height', 'Off by', 'Width', 'Sidewall'], shown.map(function (o) { return { c: ['<a href="' + root() + 'tire-size-calculator/?a=' + enc(o.label) + '">' + o.label + '</a>', f(o.diaIn, 1) + ' in', sg(o.diffIn, 2, ' in'), f(o.widthIn, 1) + ' in', f(o.sidewallIn, 1) + ' in'] }; }));
         if (opts.length > shown.length) h += '<p class="hint">Showing the first ' + shown.length + ' of ' + opts.length + '. Pick a wheel or a width to narrow the list.</p>';
         last += 'Metric sizes about ' + hh + ' in tall: ' + shown.slice(0, 5).map(function (o) { return o.label + ' (' + f(o.diaIn, 1) + ' in)'; }).join(', ') + '. ' + location.href;
       }
-      if (!h) return empty('Enter a tire size or a height in inches');
+      if (!h) return empty('Type a tire size or a height in inches');
       return h + CAVEAT + actions(last);
     } };
 
   T.finder = {
     run: function () {
-      var S = parse('s', true); if (!S) return empty('Enter your stock tire size');
+      var S = parse('s', true); if (!S) return empty('Type your stock tire size');
       var d = C.dims(S), tol = n('tol') || 3, mw = $('mw').value === '' ? null : n('mw'), steps = $('rs').value.split(',').filter(function (x) { return x !== ''; }).map(Number);
-      if (!steps.length) return '<div class="alert">' + UI.icon('alert') + '<div>Tick at least one wheel size.</div></div>';
+      if (!steps.length) return '<div class="alert">' + UI.icon('alert') + '<div>Tick at least one wheel size to see sizes.</div></div>';
       var rims = steps.map(function (s) { return d.rim + s; }).filter(function (r) { return r >= 10 && r <= 26; });
       var all = C.alternates(d, tol, rims, mw == null ? {} : { maxWidthDeltaMm: mw });
       var h = '<h2>' + UI.icon('search') + 'Sizes that fit a ' + esc(d.label) + ' wheel and height</h2>';
       var best = all.slice(0, 3).map(function (o) { return o.label + ' (' + sg(o.diffPct, 1, '%') + ')'; }).join(', ');
-      h += verdictBox(all.length ? 'close' : 'check', all.length ? 'Calculated' : 'None found', f(all.length, 0) + ' calculated sizes within ±' + tol + '%', all.length ? 'Closest: ' + best + '. Stock is ' + f(d.diaIn, 2) + ' in tall.' : 'Try a wider tolerance or more wheel sizes.');
+      h += verdictBox(all.length ? 'close' : 'check', all.length ? 'Calculated' : 'None found', f(all.length, 0) + ' calculated sizes within ±' + tol + '%', all.length ? 'Closest: ' + best + '. Stock is ' + f(d.diaIn, 2) + ' in tall.' : 'Nothing fits. Widen the tolerance or add wheel sizes.');
       h += '<p class="hint"><strong>Calculated sizes.</strong> Check that a tire is sold in that size, that the wheel is the right width for it, and that the load index and speed rating suit your vehicle.</p>';
       rims.forEach(function (r) {
         var rows = all.filter(function (o) { return o.rim === r; }), step = r - d.rim, cap = 25;
@@ -199,9 +199,9 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
     run: function () {
       var md = $('md').value, h = '';
       if (md === 'gps') {
-        var A = parse('a', true); if (!A) return empty('Enter your stock tire size');
+        var A = parse('a', true); if (!A) return empty('Type your stock tire size');
         var d = C.dims(A), g = C.effectiveDiaFromGps(n('sd'), n('gp'), d.diaIn);
-        if (!g.ok) return empty('Enter your speedometer and GPS speeds');
+        if (!g.ok) return empty('Type your speedometer and GPS speeds');
         var lvl = Math.abs(g.errorPct) <= 3 ? 'close' : Math.abs(g.errorPct) <= 5 ? 'check' : 'big';
         h += '<h2>' + UI.icon('chart') + 'Speedometer vs GPS</h2>' + verdictBox(lvl, Math.abs(g.errorPct) < 0.05 ? 'Accurate' : g.errorPct > 0 ? 'Reads low' : 'Reads high', 'Error ' + sg(g.errorPct, 2, '%') + ': effective tire height ' + f(g.effectiveDiaIn, 2) + ' in',
           'The speedometer says ' + f(n('sd'), 1) + ' and GPS says ' + f(n('gp'), 1) + ', so real speed is ' + f(Math.abs(g.errorPct), 2) + '% ' + (g.errorPct >= 0 ? 'above' : 'below') + ' what the dash shows. Your stock ' + esc(d.label) + ' is ' + f(d.diaIn, 2) + ' in tall; an effective height of ' + f(g.effectiveDiaIn, 2) + ' in is ' + sg(g.diffIn, 2, ' in') + ' (worn tires, pressure, or a different size can all do this).');
@@ -211,8 +211,8 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
         return h + actions('Speedometer ' + f(n('sd'), 1) + ' vs GPS ' + f(n('gp'), 1) + ': error ' + sg(g.errorPct, 2, '%') + ', effective tire height ' + f(g.effectiveDiaIn, 2) + ' in. ' + location.href);
       }
       var oldD, newD, lblA, lblB;
-      if (md === 'dia') { oldD = n('da'); newD = n('db'); lblA = f(oldD, 2) + ' in'; lblB = f(newD, 2) + ' in'; if (!(oldD > 0 && newD > 0)) return empty('Enter both tire heights in inches'); }
-      else { var a = parse('a', true), b = parse('b', true); if (!a || !b) return empty('Enter both tire sizes'); var c0 = C.compare(a, b); oldD = c0.a.diaIn; newD = c0.b.diaIn; lblA = c0.a.label; lblB = c0.b.label; }
+      if (md === 'dia') { oldD = n('da'); newD = n('db'); lblA = f(oldD, 2) + ' in'; lblB = f(newD, 2) + ' in'; if (!(oldD > 0 && newD > 0)) return empty('Type both tire heights in inches'); }
+      else { var a = parse('a', true), b = parse('b', true); if (!a || !b) return empty('Type both tire sizes'); var c0 = C.compare(a, b); oldD = c0.a.diaIn; newD = c0.b.diaIn; lblA = c0.a.label; lblB = c0.b.label; }
       var pct = (newD / oldD - 1) * 100, sp = n('sp') || 60, mi = n('mi'), ts = C.trueSpeed(sp, oldD, newD), lv = C.verdictFor(pct).level, low = pct > 0;
       h += '<h2>' + UI.icon('chart') + esc(lblA) + ' to ' + esc(lblB) + '</h2>' + verdictBox(lv, Math.abs(pct) < 0.05 ? 'Accurate' : low ? 'Reads low' : 'Reads high', Math.abs(pct) < 0.05 ? 'No speedometer error' : 'Real speed is ' + f(Math.abs(pct), 1) + '% ' + (low ? 'above' : 'below') + ' the speedometer',
         'At ' + f(sp, 0) + ' mph on the speedometer you’re really doing ' + f(ts, 1) + ' mph (' + sg(ts - sp, 1, ' mph') + '). The new tire is ' + f(Math.abs(pct), 1) + '% ' + (low ? 'taller' : 'shorter') + ', so each turn covers ' + (low ? 'more' : 'less') + ' road than the speedometer expects.');
@@ -225,9 +225,9 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
 
   T.gear = {
     run: function () {
-      var a = parse('a', true), b = parse('b', true); if (!a || !b) return empty('Enter both tire sizes');
+      var a = parse('a', true), b = parse('b', true); if (!a || !b) return empty('Type both tire sizes');
       var ax = n('ax'), tr = n('tr') || 1, sp = n('sp'), list = String($('rl').value).split(/[,\s]+/).map(parseFloat).filter(function (x) { return x > 0; });
-      if (!(ax > 0)) return empty('Enter your current axle ratio, like 3.73');
+      if (!(ax > 0)) return empty('Type your axle ratio, like 3.73');
       var c = C.compare(a, b), O = c.a.diaIn, N = c.b.diaIn, r = C.regear(ax, O, N, list), pct = c.diffPct;
       var rpmOf = function (ratio, dia) { return C.rpm(sp, ratio, tr, dia); }, s0 = rpmOf(ax, O);
       var rowsR = [
@@ -261,12 +261,12 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
   T.offset = {
     run: function () {
       var ow = n('ow'), oo = n('oo'), nw = n('nw'), no = n('no'), ob = $('ob').value.trim(), nb = $('nb').value.trim();
-      if (!(ow > 0 && nw > 0)) return empty('Enter both wheel widths');
+      if (!(ow > 0 && nw > 0)) return empty('Type both wheel widths');
       var o = C.offset(ow, oo, nw, no, { oldBack: ob, newBack: nb }), inner = o.innerIn, outer = o.outerIn;
       var txt = 'Sits ' + f(Math.abs(outer), 2) + ' in ' + (outer >= 0 ? 'further out toward the fender' : 'further in, away from the fender') + ' and gives ' + f(Math.abs(inner), 2) + ' in ' + (inner >= 0 ? 'more' : 'less') + ' room on the inside.';
       var lv = (inner < -0.25) ? 'check' : 'close';
       var h = '<h2>' + UI.icon('chart') + f(ow, 1) + ' in ' + sg(oo, 0, ' mm') + ' to ' + f(nw, 1) + ' in ' + sg(no, 0, ' mm') + '</h2>';
-      h += verdictBox(lv, inner < -0.25 ? 'Check inner clearance' : 'Compare clearances', txt, 'Inner clearance ' + sg(inner, 2, ' in') + ' (' + sg(o.innerMm, 0, ' mm') + '), outer position ' + sg(outer, 2, ' in') + ' (' + sg(o.outerMm, 0, ' mm') + '). This does not say whether the wheel fits: measure your clearances.');
+      h += verdictBox(lv, inner < -0.25 ? 'Check inner clearance' : 'Compare clearances', txt, 'Inner clearance ' + sg(inner, 2, ' in') + ' (' + sg(o.innerMm, 0, ' mm') + '), outer position ' + sg(outer, 2, ' in') + ' (' + sg(o.outerMm, 0, ' mm') + '). This won’t tell you if the wheel fits. Measure your clearances.');
       h += '<div class="stats s3">' + stat('Inside room', sg(inner, 2, ' in')) + stat('Outer poke', sg(outer, 2, ' in')) + stat('New backspacing', f(o.newBack, 2) + ' in') + '</div>';
       h += tbl('Backspacing and front spacing', ['Measure', 'Current', 'New', 'Change'], [
         { c: ['Backspacing (mounting face to inner edge)', f(o.oldBack, 2) + ' in', f(o.newBack, 2) + ' in', sg(o.newBack - o.oldBack, 2, ' in')] },
@@ -280,7 +280,7 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
   T.dot = {
     run: function () {
       var err = $('dcE'), r = C.dotDate($('dc').value, new Date()); err.textContent = '';
-      if (!String($('dc').value).trim()) return empty('Enter the last four digits of the DOT code');
+      if (!String($('dc').value).trim()) return empty('Type the last four digits of the DOT code');
       if (!r.ok) { err.textContent = r.error; return '<div class="alert err">' + UI.icon('alert') + '<div>' + esc(r.error) + '</div></div>'; }
       var mo = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       var start = new Date(Date.UTC(r.year, 0, 1 + (r.week - 1) * 7)), mon = mo[start.getUTCMonth()], yrs = Math.floor(r.ageMonths / 12), rem = r.ageMonths % 12;
@@ -305,7 +305,7 @@ addEventListener('DOMContentLoaded', function () { 'use strict';
     show();
     var bad = 0; form.querySelectorAll('input[type=number]').forEach(function (el) { var b = el.value !== '' && !isFinite(+el.value); el.setAttribute('aria-invalid', b ? 'true' : 'false'); if (b) bad++; });
     history.replaceState(null, '', UI.stateURL());
-    out.innerHTML = bad ? '<div class="alert err">' + UI.icon('alert') + '<div>Some numbers are not valid. Fix the highlighted fields.</div></div>' : tl.run();
+    out.innerHTML = bad ? '<div class="alert err">' + UI.icon('alert') + '<div>Some numbers don’t work. Fix the highlighted fields.</div></div>' : tl.run();
     UI.syncPresets && UI.syncPresets();
   }
   var deb = UI.debounce(render, 40);

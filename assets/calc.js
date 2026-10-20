@@ -149,8 +149,8 @@
   /* ---------- DOT date code (last four digits: week, year) ---------- */
   function dotDate(code, today) {
     var m = /(\d{2})(\d{2})\s*$/.exec(String(code || '').replace(/\s+/g, ''));
-    if (!m) return { ok: false, error: 'Enter the last four digits of the DOT code, like 2223.' };
-    var wk = +m[1], yy = +m[2]; if (wk < 1 || wk > 53) return { ok: false, error: 'The first two digits are the week (01 to 53).' };
+    if (!m) return { ok: false, error: 'Type the last four digits of the DOT code, like 2223.' };
+    var wk = +m[1], yy = +m[2]; if (wk < 1 || wk > 53) return { ok: false, error: 'The first two digits are the week, 01 to 53.' };
     var year = 2000 + yy, t = today || new Date();
     var start = new Date(Date.UTC(year, 0, 1 + (wk - 1) * 7)), now = t.getTime ? t : new Date(t);
     var months = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
